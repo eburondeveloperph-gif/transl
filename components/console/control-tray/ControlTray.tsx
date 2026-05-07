@@ -54,6 +54,22 @@ function ControlTray({ children }: ControlTrayProps) {
 
   const prevIsSpeakingRef = useRef(false);
 
+  const [micEnabled, setMicEnabled] = useState(false);
+  const micEnabledRef = useRef(false);
+
+  useEffect(() => {
+    if (isAiSpeaking) {
+      setMicEnabled(false);
+      micEnabledRef.current = false;
+    } else {
+      const timeout = setTimeout(() => {
+        setMicEnabled(true);
+        micEnabledRef.current = true;
+      }, 800); // 800ms decay buffer to prevent picking up trailing AI audio/echo
+      return () => clearTimeout(timeout);
+    }
+  }, [isAiSpeaking]);
+
   useEffect(() => {
     if (prevIsSpeakingRef.current && !isSpeaking && connected && !isAiSpeaking) {
       forceEndpoint();
@@ -64,10 +80,10 @@ function ControlTray({ children }: ControlTrayProps) {
   useEffect(() => {
     if (audioRecorder.stream) {
       audioRecorder.stream.getTracks().forEach(track => {
-        track.enabled = !isAiSpeaking && !muted;
+        track.enabled = micEnabled && !muted;
       });
     }
-  }, [isAiSpeaking, muted, audioRecorder.stream]);
+  }, [micEnabled, muted, audioRecorder.stream]);
   
   useEffect(() => {
     if (!connected && connectButtonRef.current) {
@@ -83,6 +99,7 @@ function ControlTray({ children }: ControlTrayProps) {
 
   useEffect(() => {
     const onData = (base64: string) => {
+      if (!micEnabledRef.current) return;
       client.sendRealtimeInput([
         {
           mimeType: 'audio/pcm;rate=16000',

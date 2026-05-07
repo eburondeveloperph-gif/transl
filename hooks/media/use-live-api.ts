@@ -73,6 +73,9 @@ export function useLiveApi({
     if (!audioStreamerRef.current) {
       audioContext({ id: 'audio-out' }).then((audioCtx: AudioContext) => {
         audioStreamerRef.current = new AudioStreamer(audioCtx);
+        audioStreamerRef.current.onComplete = () => {
+          setIsAiSpeaking(false);
+        };
         audioStreamerRef.current
           .addWorklet<any>('vumeter-out', VolMeterWorket, (ev: any) => {
             setVolume(ev.data.volume);
@@ -100,6 +103,7 @@ export function useLiveApi({
       if (audioStreamerRef.current) {
         audioStreamerRef.current.stop();
       }
+      setIsAiSpeaking(false);
     };
 
     const onAudio = (data: ArrayBuffer) => {
@@ -110,7 +114,7 @@ export function useLiveApi({
     };
 
     const onTurnComplete = () => {
-      setIsAiSpeaking(false);
+      // AudioStreamer's onComplete handles setting isAiSpeaking to false when audio finishes playing
     };
 
     // Bind event listeners
