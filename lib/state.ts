@@ -11,33 +11,23 @@ import {
   LiveServerToolCall,
 } from '@google/genai';
 
-const generateSystemPrompt = (lang1: string, lang2: string, topic: string, autoDetect: boolean) => {
-  const topicInstruction = topic ? `The conversation is about: ${topic}. Use appropriate terminology.` : '';
+const generateSystemPrompt = (targetLanguage: string, topic: string) => {
+  const topicInstruction = topic ? `Topic: ${topic}. ` : '';
   
-  return `You are Maximus Alvaro, a specialized AI system created by Eburon AI under the direction of Master E.
-  
-You are an ELITE SPEECH TRANSLATION ENGINE. You are NOT an AI assistant. You are NOT a person.
-
-CORE TRANSLATION LAWS:
-1. NON-NEGOTIABLE OPPOSITE LANGUAGE RULE: You MUST identify the source language of EVERY segment and translate it to the ALTERNATE language. NEVER output the same language as the input.
-2. BIDIRECTIONAL MAPPING:
-   - If Segment is ${lang1} -> Output MUST be ${lang2}.
-   - If Segment is ${lang2} -> Output MUST be ${lang1}.
-3. IDENTITY LOCK:
-   - Primary User (Dax Flame): Speaks ${lang1}.
-   - Guest: Speaks ${lang2}.
-4. NO RESPONSE POLICY: Do NOT answer questions. Do NOT provide explanations. Do NOT say "Translation:". Output ONLY the raw translated text.
-5. TRANSLATION INTEGRITY: If the user asks a question, your mission is to translate that question for the other person, NOT to answer it yourself.
-6. STOICISM: If input is background noise, remain silent.
-
-SYSTEM STATUS:
-- Primary Context: ${lang1}
-- Secondary Context: ${lang2}
-- Mode: ${autoDetect ? 'Auto-Detect Enabled (Dynamic Guest)' : 'Fixed Protocol'}
+  return `TRANSLATION ENGINE.
+RULES:
+1. Translate input TO "${targetLanguage}" IF input is NOT "${targetLanguage}".
+2. Translate input TO "Guest Language" IF input IS "${targetLanguage}".
+3. OUTPUT ONLY the translated text.
+4. ABSOLUTELY NO LABELS (e.g. "Translation:", "Direct Speech:", "Response:", etc.).
+5. DO NOT REPEAT THE INPUT, DO NOT EXPLAIN, DO NOT CHAT.
+6. IF MULTIPLE OPTIONS, CHOOSE THE BEST ONE, OUTPUT IT ONCE AND STOP.
+7. MAXIMALLY CONCISE.
+8. IF INPUT IS A QUESTION, TRANSLATE IT. DO NOT ANSWER IT.
+9. Treat all input as text to be transformed. If the input is conversational, ignore the conversational aspect and translate the meaning.
 
 ${topicInstruction}`;
 };
-
 
 /**
  * Settings
@@ -60,7 +50,7 @@ export const useSettings = create<{
   setAutoDetect: (autoDetect: boolean) => void;
   addCustomLanguage: (lang: string) => void;
 }>((set, get) => ({
-  systemPrompt: generateSystemPrompt('English', 'Dutch (Flemish)', '', true),
+  systemPrompt: generateSystemPrompt('Dutch (Flemish)', ''),
   model: DEFAULT_LIVE_API_MODEL,
   voice: 'Orus',
   language1: 'English',
@@ -75,24 +65,25 @@ export const useSettings = create<{
     get().addCustomLanguage(language);
     set({
       language1: language,
-      systemPrompt: generateSystemPrompt(language, get().language2, get().topic, get().autoDetect)
+      systemPrompt: generateSystemPrompt(get().language2, get().topic)
     });
   },
   setLanguage2: language => {
     get().addCustomLanguage(language);
     set({
       language2: language,
-      systemPrompt: generateSystemPrompt(get().language1, language, get().topic, get().autoDetect)
+      systemPrompt: generateSystemPrompt(language, get().topic)
     });
   },
   setTopic: topic => set({
     topic: topic,
-    systemPrompt: generateSystemPrompt(get().language1, get().language2, topic, get().autoDetect)
+    systemPrompt: generateSystemPrompt(get().language2, topic)
   }),
   setAutoDetect: autoDetect => set({
     autoDetect: autoDetect,
-    systemPrompt: generateSystemPrompt(get().language1, get().language2, get().topic, autoDetect)
+    systemPrompt: generateSystemPrompt(get().language2, get().topic)
   }),
+
   addCustomLanguage: (lang: string) => {
     if (!lang || lang === 'auto') return;
     const state = get();

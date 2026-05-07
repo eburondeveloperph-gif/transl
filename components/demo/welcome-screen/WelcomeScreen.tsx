@@ -30,7 +30,7 @@ const WelcomeScreen: React.FC = () => {
             <div className="dot"></div>
             <span>System Ready</span>
           </div>
-          <p className="welcome-hint">Start speaking or click the Play button to begin translation.</p>
+          <p className="welcome-hint text-7xl font-bold leading-tight">Dear Guest, Press Play and Speak</p>
         </div>
       </div>
     );
