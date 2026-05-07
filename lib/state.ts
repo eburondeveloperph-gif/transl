@@ -25,7 +25,7 @@ CRITICAL DIRECTIVES:
 4. If you hear silence or noise, DO NOT output anything.
 5. Translate EXACTLY what is said, and STOP IMMEDIATELY.
 
-ROUTING LOGIC
+NON NEGOTIABLE CONSTANT:
 - PERSON 1: ${lang1}
 - PERSON 2: ${autoDetect ? 'Auto-detected based on input' : lang2}
 Translate PERSON 1 speech to PERSON 2 language.
