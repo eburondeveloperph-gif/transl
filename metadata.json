@@ -1,0 +1,8 @@
+{
+  "name": "Remix: transl",
+  "description": "Real-time dual translation",
+  "requestFramePermissions": [
+    "microphone"
+  ],
+  "majorCapabilities": []
+}
