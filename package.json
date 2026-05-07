@@ -15,6 +15,7 @@
     "classnames": "^2.5.1",
     "eventemitter3": "^5.0.1",
     "firebase": "^12.12.1",
+    "franc-min": "^6.2.0",
     "lodash": "^4.17.21",
     "lucide-react": "^1.14.0",
     "path": "^0.12.7",

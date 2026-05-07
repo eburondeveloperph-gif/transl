@@ -46,8 +46,6 @@ export default function LoginScreen() {
           <div className="logo-circle">
             <Languages size={40} color="white" />
           </div>
-          <h1>Maximus Alvaro</h1>
-          <p>Real-time Speech Translation by Eburon AI</p>
         </div>
 
         <div className="login-tabs">

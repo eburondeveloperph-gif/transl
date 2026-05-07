@@ -16,10 +16,31 @@ import {
 } from '../../../lib/state';
 import { useHistoryStore } from '../../../lib/history';
 import { useAuth, updateUserConversations } from '../../../lib/auth';
+import { franc } from 'franc-min';
+
+const ISO_TO_LANG: Record<string, string> = {
+  'nld': 'Dutch (Flemish)',
+  'tgl': 'Tagalog (Filipino)',
+  'spa': 'Spanish',
+  'fra': 'French',
+  'deu': 'German',
+  'eng': 'English',
+  'jpn': 'Japanese',
+  'cmn': 'Chinese',
+  'kor': 'Korean',
+  'ita': 'Italian',
+  'por': 'Portuguese',
+  'rus': 'Russian',
+  'ara': 'Arabic',
+  'hin': 'Hindi',
+  'vie': 'Vietnamese',
+  'tha': 'Thai',
+  'ind': 'Indonesian',
+};
 
 export default function StreamingConsole() {
   const { client, setConfig } = useLiveAPIContext();
-  const { systemPrompt, voice, language1, language2 } = useSettings();
+  const { systemPrompt, voice, language1, language2, autoDetect } = useSettings();
   const { addHistoryItem } = useHistoryStore();
   const { user } = useAuth();
 
@@ -74,10 +95,24 @@ export default function StreamingConsole() {
 
   useEffect(() => {
     const { addTurn, updateLastTurn } = useLogStore.getState();
+    let firstTurn = true;
 
     const handleInputTranscription = (text: string, isFinal: boolean) => {
       const turns = useLogStore.getState().turns;
       const last = turns[turns.length - 1];
+      
+      if (isFinal && firstTurn && text.length > 10) {
+        firstTurn = false;
+        const detectedIso = franc(text);
+        const detectedLang = ISO_TO_LANG[detectedIso];
+        
+        if (detectedLang && detectedLang !== language1) {
+          console.log(`[AutoDetect] First speaker detected as: ${detectedLang}. Setting as guest language.`);
+          useSettings.getState().setLanguage2(detectedLang);
+          useSettings.getState().setAutoDetect(false);
+        }
+      }
+
       if (last && last.role === 'user' && !last.isFinal) {
         updateLastTurn({
           text: last.text + text,
