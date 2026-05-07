@@ -16,31 +16,33 @@ import {
 } from '../../../lib/state';
 import { useHistoryStore } from '../../../lib/history';
 import { useAuth, updateUserConversations } from '../../../lib/auth';
-import { franc } from 'franc-min';
+import LanguageDetect from 'languagedetect';
 
-const ISO_TO_LANG: Record<string, string> = {
-  'nld': 'Dutch (Flemish)',
-  'tgl': 'Tagalog (Filipino)',
-  'spa': 'Spanish',
-  'fra': 'French',
-  'deu': 'German',
-  'eng': 'English',
-  'jpn': 'Japanese',
-  'cmn': 'Chinese',
-  'kor': 'Korean',
-  'ita': 'Italian',
-  'por': 'Portuguese',
-  'rus': 'Russian',
-  'ara': 'Arabic',
-  'hin': 'Hindi',
-  'vie': 'Vietnamese',
-  'tha': 'Thai',
-  'ind': 'Indonesian',
+const lngDetector = new LanguageDetect();
+
+const LANG_MAP: Record<string, string> = {
+  'dutch': 'Dutch (Flemish)',
+  'tagalog': 'Tagalog (Filipino)',
+  'spanish': 'Spanish',
+  'french': 'French',
+  'german': 'German',
+  'english': 'English',
+  'japanese': 'Japanese',
+  'chinese': 'Chinese',
+  'korean': 'Korean',
+  'italian': 'Italian',
+  'portuguese': 'Portuguese',
+  'russian': 'Russian',
+  'arabic': 'Arabic',
+  'hindi': 'Hindi',
+  'vietnamese': 'Vietnamese',
+  'thai': 'Thai',
+  'indonesian': 'Indonesian',
 };
 
 export default function StreamingConsole() {
   const { client, setConfig } = useLiveAPIContext();
-  const { systemPrompt, voice, language1, language2, autoDetect } = useSettings();
+  const { systemPrompt, voice, language1, language2 } = useSettings();
   const { addHistoryItem } = useHistoryStore();
   const { user } = useAuth();
 
@@ -103,13 +105,22 @@ export default function StreamingConsole() {
       
       if (isFinal && firstTurn && text.length > 10) {
         firstTurn = false;
-        const detectedIso = franc(text);
-        const detectedLang = ISO_TO_LANG[detectedIso];
+        const detected = lngDetector.detect(text, 1);
         
-        if (detectedLang && detectedLang !== language1) {
-          console.log(`[AutoDetect] First speaker detected as: ${detectedLang}. Setting as guest language.`);
-          useSettings.getState().setLanguage2(detectedLang);
-          useSettings.getState().setAutoDetect(false);
+        if (detected && detected.length > 0) {
+          const [lang, confidence] = detected[0];
+          console.log(`[AutoDetect] Detected: ${lang} (confidence: ${confidence})`);
+          
+          if (confidence > 0.15) {
+            const detectedLang = LANG_MAP[lang as keyof typeof LANG_MAP];
+            
+            if (detectedLang && detectedLang !== 'Dutch (Flemish)') {
+              console.log(`[AutoDetect] Setting primary language to: ${detectedLang}`);
+              useSettings.getState().setLanguage1(detectedLang);
+              useSettings.getState().setLanguage2('Dutch (Flemish)');
+              useSettings.getState().setAutoDetect(false);
+            }
+          }
         }
       }
 

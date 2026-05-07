@@ -6,11 +6,10 @@ import React, { useState } from 'react';
 import { useSettings, useUI } from '../lib/state';
 import c from 'classnames';
 import { useLiveAPIContext } from '../contexts/LiveAPIContext';
-import { useAuth } from '../lib/auth';
 import { useHistoryStore, HistoryItem as HistoryItemType } from '../lib/history';
 import { X, Trash2, Copy, Check, ArrowRight } from 'lucide-react';
 
-function HistoryItem({ item }: { item: HistoryItemType }) {
+const HistoryItem: React.FC<{ item: HistoryItemType }> = ({ item }) => {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
@@ -51,12 +50,8 @@ function HistoryItem({ item }: { item: HistoryItemType }) {
 
 export default function Sidebar() {
   const { isSidebarOpen, toggleSidebar } = useUI();
-  const {
-    systemPrompt, topic,
-    setSystemPrompt, setTopic
-  } = useSettings();
+  const { topic, setTopic } = useSettings();
   const { connected } = useLiveAPIContext();
-  const { isSuperAdmin } = useAuth();
   const { history, clearHistory } = useHistoryStore();
 
   const handleSave = () => {

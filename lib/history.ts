@@ -6,8 +6,6 @@ import {
   set as dbSet, 
   onValue, 
   remove, 
-  query, 
-  orderByChild,
   off,
   serverTimestamp
 } from 'firebase/database';

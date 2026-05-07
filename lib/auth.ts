@@ -15,7 +15,7 @@ import {
   User
 } from 'firebase/auth';
 import { auth, rtdb } from './firebase';
-import { ref, set, get, update, child } from 'firebase/database';
+import { ref, set, update } from 'firebase/database';
 
 // --- AUTH STORE ---
 interface AuthState {

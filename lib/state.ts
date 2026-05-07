@@ -60,11 +60,11 @@ export const useSettings = create<{
   setAutoDetect: (autoDetect: boolean) => void;
   addCustomLanguage: (lang: string) => void;
 }>((set, get) => ({
-  systemPrompt: generateSystemPrompt('Dutch (Flemish)', 'Tagalog (Filipino)', '', true),
+  systemPrompt: generateSystemPrompt('English', 'Dutch (Flemish)', '', true),
   model: DEFAULT_LIVE_API_MODEL,
   voice: 'Orus',
-  language1: 'Dutch (Flemish)',
-  language2: 'Tagalog (Filipino)',
+  language1: 'English',
+  language2: 'Dutch (Flemish)',
   topic: '',
   autoDetect: true,
   customLanguages: [],
