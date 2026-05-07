@@ -3,7 +3,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
 */
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import WelcomeScreen from '../welcome-screen/WelcomeScreen';
 // FIX: Import LiveServerContent to correctly type the content handler.
 import { Modality, LiveServerContent, Type, LiveServerToolCall } from '@google/genai';
@@ -18,14 +18,10 @@ import { useHistoryStore } from '../../../lib/history';
 import { useAuth, updateUserConversations } from '../../../lib/auth';
 
 export default function StreamingConsole() {
-  const { client, setConfig, connected } = useLiveAPIContext();
+  const { client, setConfig } = useLiveAPIContext();
   const { systemPrompt, voice, language1, language2 } = useSettings();
   const { addHistoryItem } = useHistoryStore();
   const { user } = useAuth();
-
-  const turns = useLogStore(state => state.turns);
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Audio intro autoplay removed
 
@@ -166,7 +162,7 @@ export default function StreamingConsole() {
             return {
               id: fc.id,
               name: fc.name,
-              response: { result: `Guest language successfully set to ${args.language}. From now on, the GUEST LANGUAGE is ${args.language}. You must translate between the STAFF LANGUAGE and ${args.language} vice versa.` }
+              response: { result: `OK. GUEST_LANGUAGE=${args.language}. TRANSLATE: ${language1} <-> ${args.language}.` }
             };
           }
           return {
@@ -189,7 +185,7 @@ export default function StreamingConsole() {
         const updatedTurns = useLogStore.getState().turns;
 
         if (user) {
-          updateUserConversations(user.id, updatedTurns);
+          updateUserConversations(user.uid, updatedTurns);
         }
 
         const finalAgentTurn = updatedTurns[updatedTurns.length - 1];

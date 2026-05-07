@@ -37,9 +37,10 @@ function ControlTray({ children }: ControlTrayProps) {
   const [audioRecorder] = useState(() => new AudioRecorder());
   const [muted, setMuted] = useState(false);
   const [micVolume, setMicVolume] = useState(0);
+  const [connecting, setConnecting] = useState(false);
   const isSpeaking = useVAD(audioRecorder);
   const connectButtonRef = useRef<HTMLButtonElement>(null);
-  const { session, user } = useAuth();
+  const { user } = useAuth();
 
   const {
     client,
@@ -56,6 +57,12 @@ function ControlTray({ children }: ControlTrayProps) {
 
   const [micEnabled, setMicEnabled] = useState(false);
   const micEnabledRef = useRef(false);
+
+  useEffect(() => {
+    if (connected) {
+      setConnecting(false);
+    }
+  }, [connected]);
 
   useEffect(() => {
     if (isAiSpeaking) {
@@ -126,42 +133,48 @@ function ControlTray({ children }: ControlTrayProps) {
   }, [connected, client, muted, audioRecorder]);
 
   const handleMicClick = () => {
-    if (!session) return;
+    if (!user) return;
     if (connected) {
       setMuted(!muted);
     } else {
-      connect();
+      setConnecting(true);
+      connect().catch(() => setConnecting(false));
     }
   };
 
   const connectButtonAction = () => {
-    if (!session) return;
+    if (!user) return;
     if (connected) {
       disconnect();
     } else {
-      connect();
+      setConnecting(true);
+      connect().catch(() => setConnecting(false));
     }
   };
 
   const handleReset = () => {
     useLogStore.getState().clearTurns();
     if (user) {
-      clearUserConversations(user.id);
+      clearUserConversations(user.uid);
     }
   };
 
-  const micButtonTitle = session
+  const micButtonTitle = user
     ? connected
       ? muted
         ? 'Unmute microphone'
         : 'Mute microphone'
-      : 'Connect and start microphone'
+      : connecting
+        ? 'Connecting...'
+        : 'Connect and start microphone'
     : 'Please sign in to use the translator';
 
-  const connectButtonTitle = session
+  const connectButtonTitle = user
     ? connected
       ? 'Stop streaming'
-      : 'Start streaming'
+      : connecting
+        ? 'Connecting...'
+        : 'Start streaming'
     : 'Please sign in to use the translator';
 
   const isMicActive = connected && !muted;
@@ -172,13 +185,15 @@ function ControlTray({ children }: ControlTrayProps) {
       <div className="control-tray-buttons">
         <nav className={cn('actions-nav')}>
           <button
-            className={cn('action-button mic-button', { active: isMicActive })}
+            className={cn('action-button mic-button', { active: isMicActive, loading: connecting })}
             onClick={handleMicClick}
             title={micButtonTitle}
-            disabled={!session}
+            disabled={!user || connecting}
             style={{ '--mic-volume': micVolume } as React.CSSProperties}
           >
-            {!muted ? (
+            {connecting ? (
+              <span className="loader-small"></span>
+            ) : !muted ? (
               <span className="material-symbols-outlined filled">mic</span>
             ) : (
               <span className="material-symbols-outlined filled">mic_off</span>
@@ -207,17 +222,21 @@ function ControlTray({ children }: ControlTrayProps) {
           <div className="connection-button-container">
             <button
               ref={connectButtonRef}
-              className={cn('action-button connect-toggle', { connected })}
+              className={cn('action-button connect-toggle', { connected, loading: connecting })}
               onClick={connectButtonAction}
               title={connectButtonTitle}
-              disabled={!session}
+              disabled={!user || connecting}
             >
-              <span className="material-symbols-outlined filled">
-                {connected ? 'pause' : 'play_arrow'}
-              </span>
+              {connecting ? (
+                <span className="loader-small"></span>
+              ) : (
+                <span className="material-symbols-outlined filled">
+                  {connected ? 'pause' : 'play_arrow'}
+                </span>
+              )}
             </button>
           </div>
-          <span className="text-indicator">Streaming</span>
+          <span className="text-indicator">{connected ? 'Streaming' : connecting ? 'Connecting...' : ''}</span>
         </div>
       </div>
     </section>

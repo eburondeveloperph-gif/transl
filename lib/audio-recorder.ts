@@ -60,7 +60,7 @@ export class AudioRecorder {
       throw new Error('Could not request user media');
     }
 
-    this.starting = new Promise(async (resolve, reject) => {
+    this.starting = new Promise(async (resolve) => {
       this.stream = await navigator.mediaDevices.getUserMedia({
         audio: {
           noiseSuppression: true,

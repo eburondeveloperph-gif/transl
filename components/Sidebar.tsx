@@ -2,17 +2,58 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
 */
+import React, { useState } from 'react';
 import { useSettings, useUI } from '../lib/state';
 import c from 'classnames';
 import { useLiveAPIContext } from '../contexts/LiveAPIContext';
 import { useAuth } from '../lib/auth';
-import { useHistoryStore } from '../lib/history';
+import { useHistoryStore, HistoryItem as HistoryItemType } from '../lib/history';
+import { X, Trash2, Copy, Check, ArrowRight } from 'lucide-react';
+
+function HistoryItem({ item }: { item: HistoryItemType }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(item.translatedText);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="history-item">
+      <div className="history-item-header">
+        <div className="history-item-languages">
+          <span>{item.lang1}</span>
+          <ArrowRight size={12} />
+          <span>{item.lang2}</span>
+        </div>
+        <button
+          onClick={handleCopy}
+          className={c('history-item-copy', { copied })}
+          title="Copy translation"
+        >
+          {copied ? <Check size={16} /> : <Copy size={16} />}
+        </button>
+      </div>
+      <div className="history-item-content">
+        <div className="history-item-source">
+          <div className="history-item-label">Source</div>
+          <div className="history-item-text">{item.sourceText}</div>
+        </div>
+        <div className="history-item-translation">
+          <div className="history-item-label">Translation</div>
+          <div className="history-item-text">{item.translatedText}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function Sidebar() {
   const { isSidebarOpen, toggleSidebar } = useUI();
   const {
-    systemPrompt, voice, language1, language2, topic, autoDetect, customLanguages,
-    setSystemPrompt, setVoice, setLanguage1, setLanguage2, setTopic, setAutoDetect
+    systemPrompt, topic,
+    setSystemPrompt, setTopic
   } = useSettings();
   const { connected } = useLiveAPIContext();
   const { isSuperAdmin } = useAuth();
@@ -25,34 +66,14 @@ export default function Sidebar() {
   return (
     <aside className={c('sidebar', { open: isSidebarOpen })}>
       <div className="sidebar-header">
-        <h3>Settings</h3>
+        <h3>Translations History</h3>
         <button onClick={toggleSidebar} className="close-button">
-          <span className="icon">close</span>
+          <X size={24} />
         </button>
       </div>
       <div className="sidebar-content">
         <div className="sidebar-section">
           <fieldset disabled={connected}>
-            {isSuperAdmin && (
-              <label>
-                System Prompt
-                <textarea
-                  value={systemPrompt}
-                  onChange={e => setSystemPrompt(e.target.value)}
-                  rows={10}
-                  placeholder="Describe the role and personality of the AI..."
-                />
-              </label>
-            )}
-            <label>
-              Voice: Orus
-            </label>
-            <label>
-              Language 1: Dutch (Flemish)
-            </label>
-            <label>
-              Language 2: Automatic Detection
-            </label>
             <label>
               Topic (Optional)
               <textarea
@@ -68,7 +89,7 @@ export default function Sidebar() {
             className="save-settings-button"
             disabled={connected}
           >
-            Save Settings
+            Save
           </button>
         </div>
         <div className="sidebar-section history-section">
@@ -80,20 +101,13 @@ export default function Sidebar() {
               disabled={history.length === 0}
               aria-label="Clear translation history"
             >
-              <span className="icon">delete_sweep</span> Clear
+              <Trash2 size={16} /> Clear
             </button>
           </div>
           <div className="history-list">
             {history.length > 0 ? (
               history.map(item => (
-                <div key={item.id} className="history-item">
-                  <div className="history-item-source">
-                    <strong>Source:</strong> {item.sourceText}
-                  </div>
-                  <div className="history-item-translation">
-                    <strong>Translation:</strong> {item.translatedText}
-                  </div>
-                </div>
+                <HistoryItem key={item.id} item={item} />
               ))
             ) : (
               <p className="history-empty-placeholder">

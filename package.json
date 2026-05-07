@@ -10,18 +10,21 @@
     "lint": "tsc --noEmit"
   },
   "dependencies": {
+    "@google/genai": "^1.4.0",
+    "@supabase/supabase-js": "^2.45.0",
+    "classnames": "^2.5.1",
+    "eventemitter3": "^5.0.1",
+    "firebase": "^12.12.1",
+    "lodash": "^4.17.21",
+    "lucide-react": "^1.14.0",
+    "path": "^0.12.7",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "@google/genai": "^1.4.0",
-    "eventemitter3": "^5.0.1",
-    "lodash": "^4.17.21",
     "vite": "^6.3.5",
-    "classnames": "^2.5.1",
-    "zustand": "^5.0.8",
-    "path": "^0.12.7",
-    "@supabase/supabase-js": "^2.45.0"
+    "zustand": "^5.0.8"
   },
   "devDependencies": {
+    "@firebase/eslint-plugin-security-rules": "^0.0.2",
     "@types/node": "^22.14.0",
     "@vitejs/plugin-react": "^5.0.0",
     "typescript": "~5.8.2",

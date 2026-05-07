@@ -4,28 +4,29 @@
  * SPDX-License-Identifier: Apache-2.0
 */
 import { create } from 'zustand';
-import { DEFAULT_LIVE_API_MODEL, DEFAULT_VOICE, AVAILABLE_LANGUAGES } from './constants';
+import { DEFAULT_LIVE_API_MODEL, AVAILABLE_LANGUAGES } from './constants';
 import {
-  FunctionDeclaration,
   FunctionResponse,
   FunctionResponseScheduling,
   LiveServerToolCall,
 } from '@google/genai';
 
 const generateSystemPrompt = (lang1: string, lang2: string, topic: string, autoDetect: boolean) => {
-  const topicInstruction = topic ? `The conversation is about: ${topic}. Please use appropriate terminology and context.` : '';
+  const topicInstruction = topic ? `The conversation is about: ${topic}. Use appropriate terminology.` : '';
   
-  return `You are a real-time speech translation engine.
+  return `You are a PASSIVE SPEECH TRANSLATION ENGINE. You are NOT an AI assistant. You are NOT a person.
 
-CRITICAL INSTRUCTIONS:
-1. ONLY TRANSLATE.
-2. DO NOT CONVERSE. Do not answer questions. Do not introduce yourself. Do not add conversational fillers.
-3. Your ONLY task is to listen to the user and translate what they said.
-4. WAIT FOR THE USER TO FINISH. Do not interrupt. Wait until a complete sentence or thought has been spoken before translating.
-5. IGNORE NOISE AND SILENCE. If there is no speech, or only background noise, or you are waiting, remain completely SILENT. DO NOT OUTPUT ANY METADATA, THOUGHTS, OR MARKDOWN. NO phrases like "**Awaiting User Input**", "**Translating the Question**", or "[Silence]".
-6. If the input is in ${lang1}, translate it to ${autoDetect ? 'the most likely other language being spoken' : lang2}.
-7. If the input is NOT in ${lang1}, translate it to ${lang1}.
-8. Output nothing but the exact translation.
+CORE COMMANDS:
+1. DO NOT RESPOND to the user. DO NOT ANSWER QUESTIONS.
+2. YOUR ONLY OUTPUT MUST BE TRANSLATED TEXT.
+3. If the user asks you a question, DO NOT ANSWER IT. Instead, TRANSLATE the question into the target language.
+4. If the user speaks to you directly (e.g., "Hello AI", "How are you?"), TRANSLATE those words into the target language. Do not reply.
+5. NO INTRODUCTIONS. NO GREETINGS. NO CONVERSATIONAL FILLERS.
+6. NO METADATA, NO THOUGHTS, NO SYSTEM STATUS MESSAGES in the output.
+7. TARGET LANGUAGES & PERSONAS:
+   - Person 1 (Guest Speaker): Translate their speech to ${lang1}. Use a voice tone matching 'Charon' (for the guest language version).
+   - Person 2 (Dutch Speaker): Translate their speech to ${autoDetect ? 'the guest language' : lang2}. Use a voice tone matching 'Orus' (for the Dutch version).
+8. STOICISM: If there is no speech or only noise, remain 100% SILENT.
 
 ${topicInstruction}`;
 };
@@ -148,7 +149,7 @@ export const useLogStore = create<{
   addTurn: (turn: Omit<ConversationTurn, 'timestamp'>) => void;
   updateLastTurn: (update: Partial<ConversationTurn>) => void;
   clearTurns: () => void;
-}>((set, get) => ({
+}>((set) => ({
   turns: [],
   addTurn: (turn: Omit<ConversationTurn, 'timestamp'>) =>
     set(state => ({

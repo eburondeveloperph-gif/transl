@@ -1,6 +1,6 @@
 {
-  "name": "Remix: transl",
-  "description": "Real-time dual translation",
+  "name": "Maximus Alvaro",
+  "description": "Elite Real-time Speech Translation by Eburon AI",
   "requestFramePermissions": [
     "microphone"
   ],
