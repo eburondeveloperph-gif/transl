@@ -65,7 +65,7 @@ function ControlTray({ children }: ControlTrayProps) {
       const timeout = setTimeout(() => {
         setMicEnabled(true);
         micEnabledRef.current = true;
-      }, 800); // 800ms decay buffer to prevent picking up trailing AI audio/echo
+      }, 2000); // 2000ms decay buffer to prevent picking up trailing AI audio/echo
       return () => clearTimeout(timeout);
     }
   }, [isAiSpeaking]);
@@ -99,7 +99,7 @@ function ControlTray({ children }: ControlTrayProps) {
 
   useEffect(() => {
     const onData = (base64: string) => {
-      if (!micEnabledRef.current) return;
+      if (!micEnabledRef.current || muted) return;
       client.sendRealtimeInput([
         {
           mimeType: 'audio/pcm;rate=16000',

@@ -106,12 +106,21 @@ export default function StreamingConsole() {
     };
 
     const handleContent = (serverContent: LiveServerContent) => {
-      const text =
+      let text =
         serverContent.modelTurn?.parts
           ?.map((p: any) => p.text)
           .filter(Boolean)
           .join(' ') ?? '';
+          
       const groundingChunks = serverContent.groundingMetadata?.groundingChunks;
+
+      // Clean up metadata / hallucinated markdown from the AI output text
+      if (text) {
+        text = text.replace(/\*\*[^*]*\*\*/g, '').trim(); // Remove **...**
+        text = text.replace(/\*[^*]*\*/g, '').trim();     // Remove *...*
+        text = text.replace(/\[[^\]]*\]/g, '').trim();    // Remove [...]
+        if (!text && !groundingChunks) return; // Ignore if it was only metadata
+      }
 
       if (!text && !groundingChunks) return;
 

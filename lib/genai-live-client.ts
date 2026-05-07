@@ -180,7 +180,13 @@ export class GenAILiveClient {
       return;
     }
     chunks.forEach(chunk => {
-      this.session!.sendRealtimeInput({ media: chunk });
+      if (chunk.mimeType.startsWith('audio/')) {
+        this.session!.sendRealtimeInput({ audio: chunk });
+      } else if (chunk.mimeType.startsWith('image/')) {
+        this.session!.sendRealtimeInput({ video: chunk });
+      } else {
+        this.session!.sendRealtimeInput({ media: chunk });
+      }
     });
 
     let hasAudio = false;
