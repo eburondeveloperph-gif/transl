@@ -36,9 +36,11 @@ const HistoryItem: React.FC<{ item: HistoryItemType }> = ({ item }) => {
       </div>
       <div className="history-item-content">
         <div className="history-item-source">
+          <div className="history-item-label">Source</div>
           <div className="history-item-text">{item.sourceText}</div>
         </div>
         <div className="history-item-translation">
+          <div className="history-item-label">Translation</div>
           <div className="history-item-text">{item.translatedText}</div>
         </div>
       </div>

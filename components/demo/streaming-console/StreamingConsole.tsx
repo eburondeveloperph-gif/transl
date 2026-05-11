@@ -158,15 +158,11 @@ export default function StreamingConsole() {
           
       const groundingChunks = serverContent.groundingMetadata?.groundingChunks;
 
-      // Clean up metadata / hallucinated markdown / labels from the AI output text
+      // Clean up metadata / hallucinated markdown from the AI output text
       if (text) {
         text = text.replace(/\*\*[^*]*\*\*/g, '').trim(); // Remove **...**
         text = text.replace(/\*[^*]*\*/g, '').trim();     // Remove *...*
         text = text.replace(/\[[^\]]*\]/g, '').trim();    // Remove [...]
-        
-        // Remove common labels
-        text = text.replace(/^(Translation|Direct Speech|Response|Staff|Guest|Agent|Speech):\s*/i, '').trim();
-        
         if (!text && !groundingChunks) return; // Ignore if it was only metadata
       }
 
